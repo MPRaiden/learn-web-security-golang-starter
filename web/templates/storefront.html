@@ -1,0 +1,24 @@
+{{define "storefront"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  {{if .Current}}<a href="/cart">Cart</a
+  ><a href="/account">Hello, {{.Current.DisplayName}}</a>{{else}}<a
+    href="/login"
+    >Log in</a
+  ><a href="/signup">Create account</a>{{end}}
+</nav>
+<p class="eyebrow">Tiny plushies. Big attack surface.</p>
+<h1>Bearly Secure</h1>
+<p class="subtitle">
+  A deliberately vulnerable plushie shop for web security lessons.
+</p>
+<form method="get" action="/search" class="search-form">
+  <label>
+    Search plushies
+    <input name="q" type="search" value="" placeholder="teddy, sloth, fox" />
+  </label>
+  <button type="submit">Search</button>
+</form>
+<ul class="products">
+  {{template "product-list" .}}
+</ul>
+{{template "document-end" .}}{{end}}

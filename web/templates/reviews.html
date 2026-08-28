@@ -1,0 +1,74 @@
+{{define "account-reviews"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a>
+</nav>
+<p class="eyebrow">Account</p>
+<h1>Your Reviews</h1>
+<section class="card-grid">
+  {{if .HasReviews}}{{range .Reviews}}
+  <article class="card">
+    <h2><a href="/products/{{.ProductID}}">{{.ProductName}}</a></h2>
+    <p class="rating" aria-label="{{.Rating}} out of 5 stars">
+      {{stars .Rating}}{{emptyStars .Rating}}
+    </p>
+    <p>{{.Body}}</p>
+    <p class="review-date">Posted {{.CreatedAt}}</p>
+    <a href="/account/reviews/{{.ID}}/edit">Edit review</a>
+  </article>
+  {{end}}{{else}}
+  <article class="card">
+    <h2>No reviews yet</h2>
+    <p>Your plushie opinions will show up here after you post a review.</p>
+    <a href="/">Browse plushies</a>
+  </article>
+  {{end}}
+</section>
+{{template "document-end" .}}{{end}} {{define "review-form"}}{{template
+"document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a
+  ><a href="/account/reviews">Reviews</a>
+</nav>
+<p class="eyebrow">Review for {{.Review.ProductName}}</p>
+<h1>Edit Review</h1>
+{{if .Error}}
+<p class="error">{{.Error}}</p>
+{{end}}
+<form
+  method="post"
+  action="/account/reviews/{{.Review.ID}}"
+  class="review-form"
+>
+  <label
+    >Rating<select name="rating" required>
+      <option value="5" {{if eq .Review.Rating 5}}selected{{end}}>
+        5 stars
+      </option>
+      <option value="4" {{if eq .Review.Rating 4}}selected{{end}}>
+        4 stars
+      </option>
+      <option value="3" {{if eq .Review.Rating 3}}selected{{end}}>
+        3 stars
+      </option>
+      <option value="2" {{if eq .Review.Rating 2}}selected{{end}}>
+        2 stars
+      </option>
+      <option value="1" {{if eq .Review.Rating 1}}selected{{end}}>
+        1 stars
+      </option>
+    </select></label
+  ><label
+    >Review<textarea name="body" rows="5" maxlength="1000" required>
+{{.Review.Body}}</textarea></label
+  ><button type="submit">Save review</button>
+</form>
+<form
+  method="post"
+  action="/account/reviews/{{.Review.ID}}/delete"
+  class="delete-form"
+>
+  <button type="submit" class="danger-link">Delete review</button>
+</form>
+{{template "document-end" .}}{{end}}

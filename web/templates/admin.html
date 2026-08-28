@@ -1,0 +1,158 @@
+{{define "admin-dashboard"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a><a href="/support">Support</a>
+</nav>
+<p class="eyebrow">Admin</p>
+<h1>Admin Dashboard</h1>
+<section class="card-grid">
+  <article class="card">
+    <h2>Products</h2>
+    <p>Create products, update catalog status, and review internal costs.</p>
+    <a href="/admin/products">View products</a>
+  </article>
+  <article class="card">
+    <h2>Remote Image Preview</h2>
+    <p>Fetch a product image URL and inspect the upstream response.</p>
+    <a href="/admin/image-preview">Preview an image</a>
+  </article>
+</section>
+{{template "document-end" .}}{{end}} {{define "admin-products"}}{{template
+"document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a><a href="/support">Support</a
+  ><a href="/admin">Admin</a>
+</nav>
+<p class="eyebrow">Admin</p>
+<h1>Products</h1>
+<p class="page-action">
+  <a class="button-link" href="/admin/products/new">Create product</a>
+</p>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Product</th>
+        <th scope="col">Status</th>
+        <th scope="col">Price</th>
+        <th scope="col">Cost</th>
+        <th scope="col">Inventory</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Products}}
+      <tr>
+        <td><a href="/admin/products/{{.ID}}">{{.Name}}</a></td>
+        <td>{{if .IsActive}}Active{{else}}Inactive{{end}}</td>
+        <td>{{money .PriceCents}}</td>
+        <td>{{money .CostCents}}</td>
+        <td>{{.InventoryCount}}</td>
+        <td><a href="/admin/products/{{.ID}}/edit">Edit</a></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{template "document-end" .}}{{end}} {{define "admin-product"}}{{template
+"document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a><a href="/support">Support</a
+  ><a href="/admin">Admin</a><a href="/admin/products">Products</a>
+</nav>
+<p class="eyebrow">Admin Product #{{.Product.ID}}</p>
+<h1>{{.Product.Name}}</h1>
+<p class="lede">{{.Product.Description}}</p>
+<p class="page-action">
+  <a class="button-link" href="/admin/products/{{.Product.ID}}/edit"
+    >Edit product</a
+  >{{if .Product.IsActive}}<a href="/products/{{.Product.ID}}"
+    >View storefront page</a
+  >{{end}}
+</p>
+<section class="card-grid">
+  <article class="card">
+    <h2>Catalog</h2>
+    <dl>
+      <dt>Status</dt>
+      <dd>{{if .Product.IsActive}}Active{{else}}Inactive{{end}}</dd>
+      <dt>Inventory</dt>
+      <dd>{{.Product.InventoryCount}}</dd>
+      <dt>Created</dt>
+      <dd>{{.Product.CreatedAt}}</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h2>Internal Pricing</h2>
+    <dl>
+      <dt>Price</dt>
+      <dd>{{money .Product.PriceCents}}</dd>
+      <dt>Cost</dt>
+      <dd>{{money .Product.CostCents}}</dd>
+      <dt>Margin</dt>
+      <dd>{{money .MarginCents}}</dd>
+    </dl>
+  </article>
+</section>
+{{template "document-end" .}}{{end}} {{define "admin-product-form"}}{{template
+"document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a><a href="/support">Support</a
+  ><a href="/admin">Admin</a><a href="/admin/products">Products</a>
+</nav>
+<p class="eyebrow">Admin</p>
+<h1>{{.Heading}}</h1>
+{{if .Error}}
+<p class="error">{{.Error}}</p>
+{{end}}
+<form method="post" action="{{.Action}}" class="product-form">
+  <label>Name<input name="name" value="{{.Product.Name}}" required /></label>
+  <label
+    >Description<textarea name="description" rows="5" required>
+{{.Product.Description}}</textarea>
+  </label>
+  <label
+    >Image path<input name="imagePath" value="{{.Product.ImagePath}}" required
+  /></label>
+  <label
+    >Price cents<input
+      name="priceCents"
+      type="number"
+      min="0"
+      step="1"
+      value="{{.Product.PriceCents}}"
+      required
+  /></label>
+  <label
+    >Cost cents<input
+      name="costCents"
+      type="number"
+      min="0"
+      step="1"
+      value="{{.Product.CostCents}}"
+      required
+  /></label>
+  <label
+    >Inventory count<input
+      name="inventoryCount"
+      type="number"
+      min="0"
+      step="1"
+      value="{{.Product.InventoryCount}}"
+      required
+  /></label>
+  <label class="checkbox-label"
+    ><input
+      name="isActive"
+      type="checkbox"
+      value="1"
+      {{if
+      .Product.IsActive}}checked{{end}}
+    />Active in storefront</label
+  >
+  <button type="submit">{{.SubmitLabel}}</button>
+</form>
+{{template "document-end" .}}{{end}}

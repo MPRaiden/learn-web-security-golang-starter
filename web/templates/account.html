@@ -1,0 +1,94 @@
+{{define "account"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a>{{if .IsSupport}}<a
+    href="/support"
+    >Support</a
+  >{{end}}{{if .IsAdmin}}<a href="/admin">Admin</a>{{end}}
+  <form method="post" action="/logout" class="logout-form">
+    <button type="submit">Log out</button>
+  </form>
+</nav>
+<p class="eyebrow">Account</p>
+<h1 class="profile-heading">Your Profile</h1>
+<div class="form-message profile-message" aria-live="polite">
+  {{if .Error}}
+  <p class="error">{{.Error}}</p>
+  {{end}}
+</div>
+<section class="card-grid">
+  <article class="card">
+    <h2>Profile</h2>
+    <dl>
+      <dt>Name</dt>
+      <dd>{{.Current.User.DisplayName}}</dd>
+      <dt>Email</dt>
+      <dd>{{.Current.User.Email}}</dd>
+      <dt>Role</dt>
+      <dd>{{.Current.User.Role}}</dd>
+    </dl>
+    <form method="post" action="/account/email" class="account-form">
+      <label
+        >Email<input
+          name="email"
+          type="email"
+          autocomplete="email"
+          value="{{.Current.User.Email}}"
+          required /></label
+      ><button type="submit">Change email</button>
+    </form>
+  </article>
+  <article class="card">
+    <h2>Orders</h2>
+    <p>Review your plushie order history.</p>
+    <a href="/account/orders">View orders</a>
+  </article>
+  <article class="card">
+    <h2>Your Reviews</h2>
+    <p>Review the plushie opinions you’ve posted.</p>
+    <a href="/account/reviews">View reviews</a>
+  </article>
+  <article class="card">
+    <h2>Two-Step Verification</h2>
+    <p>
+      {{if .Current.User.HasTOTP}}Two-step verification is enabled. Your account
+      requires an authenticator code when you log in.{{else}}Set up an
+      authenticator app to enable two-step verification.{{end}}
+    </p>
+    <a href="/account/totp">Manage two-step verification</a>
+  </article>
+  <article class="card">
+    <h2>Passkeys</h2>
+    <p>Register a device passkey to sign in without a password.</p>
+    <a href="/account/passkey">Manage passkeys</a>
+  </article>
+  <article class="card">
+    <h2>Tax Exemption</h2>
+    <p>Upload tax exemption certificates for support review.</p>
+    <a href="/account/tax-exemption">Manage documents</a>
+  </article>
+  <article class="card">
+    <h2>Session</h2>
+    <dl>
+      <dt>Created</dt>
+      <dd>{{.Current.Session.CreatedAt}}</dd>
+      <dt>Expires</dt>
+      <dd>{{.ExpiresAt}}</dd>
+      <dt>Last authenticated</dt>
+      <dd>{{.Current.Session.LastAuthenticatedAt}}</dd>
+    </dl>
+  </article>
+  {{if .IsSupport}}
+  <article class="card">
+    <h2>Support</h2>
+    <p>Review customer orders and internal notes.</p>
+    <a href="/support">Open support dashboard</a>
+  </article>
+  {{end}} {{if .IsAdmin}}
+  <article class="card">
+    <h2>Admin</h2>
+    <p>Review product pricing, inventory, and internal costs.</p>
+    <a href="/admin">Open admin dashboard</a>
+  </article>
+  {{end}}
+</section>
+{{template "document-end" .}}{{end}}

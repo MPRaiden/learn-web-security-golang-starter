@@ -1,0 +1,74 @@
+{{define "totp-setup"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">{{.DisplayName}}’s Account</a>
+</nav>
+<p class="eyebrow">Account</p>
+<h1>Set Up Two-Step Verification</h1>
+<p class="subtitle">
+  Scan this code with an authenticator app like Google Authenticator or Authy.
+</p>
+<div class="totp-setup-code">
+  <img
+    src="{{.QRDataURL}}"
+    alt="QR code for two-step verification setup"
+    width="200"
+    height="200"
+  />
+  <p>Or enter this key manually: <code>{{.Secret}}</code></p>
+</div>
+<p class="totp-setup-instruction">
+  Then enter the 6-digit code from your authenticator app to finish setup.
+</p>
+{{if .Error}}
+<p class="error">{{.Error}}</p>
+{{end}}
+<form method="post" action="/account/totp/confirm" class="account-form">
+  <label
+    >Authenticator code<input
+      name="code"
+      type="text"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      required
+      autofocus /></label
+  ><button type="submit">Enable two-step verification</button>
+</form>
+{{template "document-end" .}}{{end}} {{define "totp-enabled"}}{{template
+"document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">{{.DisplayName}}’s Account</a>
+</nav>
+<p class="eyebrow">Account</p>
+<h1>Two-Step Verification Enabled</h1>
+<p class="subtitle">
+  Your account requires an authenticator code when you log in.
+</p>
+<form method="post" action="/account/totp/disable" class="account-form">
+  <p>
+    Turning off two-step verification also invalidates your remaining backup
+    codes.
+  </p>
+  <button type="submit" class="danger-link">
+    Turn off two-step verification
+  </button>
+</form>
+{{template "document-end" .}}{{end}} {{define "totp-backup-codes"}}{{template
+"document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">{{.DisplayName}}’s Account</a>
+</nav>
+<p class="eyebrow">Account</p>
+<h1>Two-Step Verification Enabled</h1>
+<p class="subtitle">
+  Save these backup codes somewhere safe. Each one only works once, and we won't
+  show them again.
+</p>
+<ul class="backup-codes">
+  {{range .BackupCodes}}
+  <li><code>{{.}}</code></li>
+  {{end}}
+</ul>
+{{template "document-end" .}}{{end}}

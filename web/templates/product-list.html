@@ -1,0 +1,35 @@
+{{define "product-list"}}{{range .Products}}
+<li class="product-card">
+  <div class="product-image-frame product-card-image-frame">
+    <img
+      class="product-card-image"
+      src="{{.ImagePath}}"
+      alt="{{.Name}} product photo"
+      width="640"
+      height="640"
+      loading="lazy"
+    />
+    {{if .OutOfStock}}<span class="stock-overlay" aria-hidden="true"
+      >Out of stock</span
+    >{{end}}
+  </div>
+  <div class="product-card-body">
+    <a class="product-link" href="/products/{{.ID}}">{{.Name}}</a> – {{money
+    .PriceCents}}
+    <p>{{.Description}}</p>
+    {{if .OutOfStock}}
+    <p class="out-of-stock">Out of stock</p>
+    {{else if .AllInventoryInCart}}
+    <p class="inventory-note">
+      All available inventory is already in your cart.
+    </p>
+    {{else}}
+    <form method="post" action="/cart/items" class="inline-cart-form">
+      <input name="productId" type="hidden" value="{{.ID}}" />
+      <input name="quantity" type="hidden" value="1" />
+      <button type="submit">Add to cart</button>
+    </form>
+    {{end}}
+  </div>
+</li>
+{{end}}{{end}}

@@ -1,0 +1,23 @@
+{{define "assistant"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a
+  ><a href="/account/orders">Orders</a>
+</nav>
+<p class="eyebrow">Local Simulation</p>
+<h1>Order Assistant</h1>
+<p class="subtitle">
+  Ask about an order, and the local assistant will choose a tool to answer.
+</p>
+<form method="post" action="/account/assistant" class="account-form">
+  <label>Message<textarea name="message" rows="4" required></textarea></label
+  ><button type="submit">Ask assistant</button>
+</form>
+{{if .Answer}}
+<section class="card-grid">
+  <article class="card">
+    <h2>Assistant</h2>
+    <p>{{.Answer}}</p>
+  </article>
+</section>
+{{end}} {{template "document-end" .}}{{end}}

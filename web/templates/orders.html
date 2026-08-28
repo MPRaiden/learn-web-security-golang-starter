@@ -1,0 +1,84 @@
+{{define "orders"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a><a href="/cart">Cart</a
+  ><a href="/account">Hello, {{.DisplayName}}</a>
+</nav>
+<p class="eyebrow">Account</p>
+<h1>Your Orders</h1>
+<p class="page-action">
+  <a class="button-link" href="/account/assistant">Ask the order assistant</a>
+</p>
+{{if .HasOrders}}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Order</th>
+        <th scope="col">Status</th>
+        <th scope="col">Total</th>
+        <th scope="col">Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Orders}}
+      <tr>
+        <td><a href="/orders/{{.ID}}">#{{.ID}}</a></td>
+        <td>{{.Status}}</td>
+        <td>{{money .TotalCents}}</td>
+        <td>{{.CreatedAt}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{else}}
+<article class="card empty-state">
+  <h2>No orders yet</h2>
+  <p>Your plushie order history will show up here after checkout.</p>
+  <a href="/">Browse plushies</a>
+</article>
+{{end}} {{template "document-end" .}}{{end}} {{define "order"}}{{template
+"document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a><a href="/cart">Cart</a
+  ><a href="/account">Hello, {{.DisplayName}}</a
+  ><a href="/account/orders">Orders</a>
+</nav>
+<p class="eyebrow">Order #{{.Order.ID}}</p>
+<h1>{{money .Order.TotalCents}}</h1>
+<section class="card-grid">
+  <article class="card">
+    <h2>Details</h2>
+    <dl>
+      <dt>Status</dt>
+      <dd>{{.Order.Status}}</dd>
+      <dt>Customer</dt>
+      <dd>{{.Order.CustomerName}}</dd>
+      <dt>Created</dt>
+      <dd>{{.Order.CreatedAt}}</dd>
+    </dl>
+  </article>
+</section>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Product</th>
+        <th scope="col">Qty</th>
+        <th scope="col">Price</th>
+        <th scope="col">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Items}}
+      <tr>
+        <td>{{.ProductName}}</td>
+        <td>{{.Quantity}}</td>
+        <td>{{money .PriceCents}}</td>
+        <td>{{money (multiply .Quantity .PriceCents)}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{template "document-end" .}}{{end}}

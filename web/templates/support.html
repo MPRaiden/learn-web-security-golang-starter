@@ -1,0 +1,241 @@
+{{define "support-dashboard"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a>{{if .IsAdmin}}<a href="/admin"
+    >Admin</a
+  >{{end}}
+</nav>
+<p class="eyebrow">Support</p>
+<h1>Support Dashboard</h1>
+<section class="card-grid">
+  <article class="card">
+    <h2>Orders</h2>
+    <p>Look up customer plushie orders and internal notes.</p>
+    <a href="/support/orders">View all orders</a>
+  </article>
+  <article class="card">
+    <h2>Tax Exemptions</h2>
+    <p>Review customer tax exemption certificates.</p>
+    <a href="/support/tax-exemptions">View documents</a
+    ><a href="/support/tax-exemptions/import">Import ZIP archive</a>
+  </article>
+</section>
+{{template "document-end" .}}{{end}} {{define "support-orders"}}{{template
+"document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a
+  ><a href="/support">Support</a>{{if .IsAdmin}}<a href="/admin">Admin</a
+  >{{end}}
+</nav>
+<p class="eyebrow">Support</p>
+<h1>All Orders</h1>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Order</th>
+        <th scope="col">Customer</th>
+        <th scope="col">Status</th>
+        <th scope="col">Total</th>
+        <th scope="col">Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Orders}}
+      <tr>
+        <td><a href="/support/orders/{{.ID}}">#{{.ID}}</a></td>
+        <td>{{.CustomerName}}<br />{{.CustomerEmail}}</td>
+        <td>{{.Status}}</td>
+        <td>{{money .TotalCents}}</td>
+        <td>{{.CreatedAt}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{template "document-end" .}}{{end}} {{define
+"support-tax-exemptions"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a
+  ><a href="/support">Support</a>{{if .IsAdmin}}<a href="/admin">Admin</a
+  >{{end}}
+</nav>
+<p class="eyebrow">Support</p>
+<h1>Tax Exemptions</h1>
+<h2 class="section-heading">Customer uploads</h2>
+{{if .Files}}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Document</th>
+        <th scope="col">Customer</th>
+        <th scope="col">Type</th>
+        <th scope="col">Uploaded</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Files}}
+      <tr>
+        <td>{{.OriginalName}}</td>
+        <td>{{.CustomerName}}<br />{{.CustomerEmail}}</td>
+        <td>{{.ContentType}}</td>
+        <td>{{.CreatedAt}}</td>
+        <td><a href="/files/{{.ID}}/download">Download</a></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{else}}
+<article class="card empty-state">
+  <h2>No documents yet</h2>
+  <p>Customer tax exemption certificates will show up here.</p>
+</article>
+{{end}}
+<h2 class="section-heading">Bulk imports</h2>
+{{if .ImportedDocuments}}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Document</th>
+        <th scope="col">Customer</th>
+        <th scope="col">Imported by</th>
+        <th scope="col">Imported</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .ImportedDocuments}}
+      <tr>
+        <td>{{.OriginalName}}</td>
+        <td>Unassigned</td>
+        <td>{{.ImportedByName}}</td>
+        <td>{{.CreatedAt}}</td>
+        <td><a href="/support/files/imports/{{.ID}}/download">Download</a></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{else}}
+<article class="card empty-state">
+  <h2>No bulk imports yet</h2>
+  <p>Documents imported from support ZIP archives will show up here.</p>
+</article>
+{{end}} {{template "document-end" .}}{{end}} {{define
+"support-order"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a
+  ><a href="/support">Support</a>{{if .IsAdmin}}<a href="/admin">Admin</a
+  >{{end}}<a href="/support/orders">Orders</a>
+</nav>
+<p class="eyebrow">Support Order #{{.Order.ID}}</p>
+<h1>{{money .Order.TotalCents}}</h1>
+<section class="card-grid">
+  <article class="card">
+    <h2>Customer</h2>
+    <dl>
+      <dt>Name</dt>
+      <dd>{{.Order.CustomerName}}</dd>
+      <dt>Email</dt>
+      <dd>{{.Order.CustomerEmail}}</dd>
+      <dt>User ID</dt>
+      <dd>{{.Order.UserID}}</dd>
+    </dl>
+  </article>
+  <article class="card">
+    <h2>Internal Notes</h2>
+    <p>
+      {{if .Order.AdminNotes}}{{.Order.AdminNotes}}{{else}}No internal
+      notes.{{end}}
+    </p>
+  </article>
+  <article class="card">
+    <h2>Shipping</h2>
+    {{if .Shipping}}
+    <address>
+      {{.Shipping.Name}}<br />{{.Shipping.Address}}<br />{{.Shipping.City}},
+      {{.Shipping.Region}} {{.Shipping.PostalCode}}
+    </address>
+    {{else}}
+    <p>No shipping details.</p>
+    {{end}}
+  </article>
+  <article class="card">
+    <h2>Status</h2>
+    <dl>
+      <dt>Status</dt>
+      <dd>{{.Order.Status}}</dd>
+      <dt>Created</dt>
+      <dd>{{.Order.CreatedAt}}</dd>
+    </dl>
+  </article>
+</section>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Product</th>
+        <th scope="col">Qty</th>
+        <th scope="col">Price</th>
+        <th scope="col">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Items}}
+      <tr>
+        <td>{{.ProductName}}</td>
+        <td>{{.Quantity}}</td>
+        <td>{{money .PriceCents}}</td>
+        <td>{{money (multiply .Quantity .PriceCents)}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{template "document-end" .}}{{end}} {{define "support-archive"}}{{template
+"document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a
+  ><a href="/support">Support</a>{{if .IsAdmin}}<a href="/admin">Admin</a
+  >{{end}}<a href="/support/tax-exemptions">Tax exemptions</a>
+</nav>
+<p class="eyebrow">Support</p>
+<h1>Import Tax Documents</h1>
+<p class="subtitle">
+  Upload a ZIP archive containing PDF, JPEG, PNG, or WebP tax exemption
+  documents for bulk review.
+</p>
+{{if .Error}}
+<p class="error">{{.Error}}</p>
+{{end}}
+<form
+  method="post"
+  action="/support/tax-exemptions/import"
+  enctype="multipart/form-data"
+  class="upload-form"
+>
+  <label
+    >ZIP archive<input
+      name="archive"
+      type="file"
+      accept=".zip,application/zip"
+      required /></label
+  ><button type="submit">Import documents</button>
+</form>
+{{if .HasImportedCount}}
+<section class="card-grid">
+  <article class="card">
+    <h2>Import Complete</h2>
+    <p>Imported {{.ImportedCount}} file{{if ne .ImportedCount 1}}s{{end}}.</p>
+    <a href="/support/tax-exemptions">View imported documents</a>
+  </article>
+</section>
+{{end}} {{template "document-end" .}}{{end}}

@@ -1,0 +1,52 @@
+{{define "image-preview"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a><a href="/support">Support</a
+  ><a href="/admin">Admin</a><a href="/admin/products">Products</a>
+</nav>
+<p class="eyebrow">Admin Tool</p>
+<h1>Preview Product Image</h1>
+<p class="subtitle">
+  Fetch a remote image to inspect its response before adding it to the catalog.
+</p>
+<form method="post" action="/admin/image-preview" class="product-form">
+  <label
+    >Image URL<input
+      name="imageUrl"
+      type="url"
+      placeholder="https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zBWqBYp-540x720.jpg"
+      required /></label
+  ><button type="submit">Fetch preview</button>
+  <div class="form-message" aria-live="polite">
+    {{if .Error}}
+    <p class="error">{{.Error}}</p>
+    {{end}}
+  </div>
+</form>
+{{if .Preview}}
+<section class="card-grid">
+  <article class="card">
+    <h2>Fetched Response</h2>
+    <dl>
+      <dt>Requested URL</dt>
+      <dd><code>{{.Preview.RequestedURL}}</code></dd>
+      <dt>Final URL</dt>
+      <dd><code>{{.Preview.FinalURL}}</code></dd>
+      <dt>Status</dt>
+      <dd>{{.Preview.Status}}</dd>
+      <dt>Content type</dt>
+      <dd><code>{{.Preview.ContentType}}</code></dd>
+      <dt>File size</dt>
+      <dd>{{number .Preview.ByteLength}} bytes</dd>
+    </dl>
+    <h3>Image preview</h3>
+    <div class="product-image-frame product-detail-image-frame">
+      <img
+        class="product-detail-image"
+        src="{{.Preview.ImageDataURL}}"
+        alt="Preview of the remote product"
+      />
+    </div>
+  </article>
+</section>
+{{end}} {{template "document-end" .}}{{end}}

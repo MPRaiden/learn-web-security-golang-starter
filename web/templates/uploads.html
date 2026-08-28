@@ -1,0 +1,60 @@
+{{define "tax-exemption"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">{{.DisplayName}}’s Account</a>
+</nav>
+<p class="eyebrow">Account</p>
+<h1>Tax Exemption</h1>
+<p class="lede">
+  Upload a tax exemption certificate if you buy plushies for a school, hospital,
+  charity, or other exempt organization.
+</p>
+{{if .Error}}
+<p class="error">{{.Error}}</p>
+{{end}}
+<form
+  method="post"
+  action="/account/tax-exemption/files"
+  enctype="multipart/form-data"
+  class="upload-form"
+>
+  <label
+    >Certificate file<input
+      name="document"
+      type="file"
+      accept="application/pdf,image/jpeg,image/png,image/webp"
+      required /></label
+  ><button type="submit">Upload document</button>
+</form>
+<section class="card-grid">
+  {{if .Files}}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Document</th>
+          <th scope="col">Type</th>
+          <th scope="col">Uploaded</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Files}}
+        <tr>
+          <td>{{.OriginalName}}</td>
+          <td>{{.ContentType}}</td>
+          <td>{{.CreatedAt}}</td>
+          <td><a href="/files/{{.ID}}/download">Download</a></td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <article class="card">
+    <h2>No documents yet</h2>
+    <p>Your uploaded tax exemption certificates will show up here.</p>
+  </article>
+  {{end}}
+</section>
+{{template "document-end" .}}{{end}}

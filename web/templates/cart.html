@@ -1,0 +1,98 @@
+{{define "cart"}}{{template "document-start" .}}
+<nav class="page-nav" aria-label="Primary">
+  <a class="brand-link" href="/">Bearly Secure</a
+  ><a href="/account">Hello, {{.DisplayName}}</a>
+</nav>
+<p class="eyebrow">Shopping Cart</p>
+<h1>Your Cart</h1>
+{{if .HasItems}}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Product</th>
+        <th scope="col">Price</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Total</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Items}}
+      <tr>
+        <td>
+          <div class="cart-product">
+            <img src="{{.ImagePath}}" alt="" width="56" height="56" />{{if eq
+            .Availability "inactive"}}<span>{{.Name}}</span>{{else}}<a
+              href="/products/{{.ProductID}}"
+              >{{.Name}}</a
+            >{{end}}
+          </div>
+        </td>
+        <td>{{money .PriceCents}}</td>
+        <td>
+          {{if eq .Availability "inactive"}}<span class="availability-warning"
+            >No longer available</span
+          >{{else if eq .Availability "out-of-stock"}}<span
+            class="availability-warning"
+            >Out of stock</span
+          >{{else}}{{if eq .Availability "insufficient-inventory"}}
+          <div class="cart-quantity-control">
+            <span class="availability-warning"
+              >Only {{.InventoryCount}} available</span
+            >{{end}}
+            <form
+              method="post"
+              action="/cart/items/{{.ProductID}}"
+              class="quantity-form"
+            >
+              <input
+                name="quantity"
+                type="number"
+                min="1"
+                max="{{.Maximum}}"
+                value="{{.Quantity}}"
+                aria-label="Quantity for {{.Name}}"
+              />
+              <button type="submit">Update</button>
+            </form>
+            {{if eq .Availability "insufficient-inventory"}}
+          </div>
+          {{end}}{{end}}
+        </td>
+        <td>{{money .LineTotalCents}}</td>
+        <td>
+          <form
+            method="post"
+            action="/cart/items/{{.ProductID}}"
+            class="remove-item-form"
+          >
+            <input name="quantity" type="hidden" value="0" /><button
+              type="submit"
+              class="danger-link"
+            >
+              Remove
+            </button>
+          </form>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+<article class="card cart-summary">
+  <h2>Total: {{money .TotalCents}}</h2>
+  {{if .CheckoutBlocked}}
+  <p class="availability-warning">
+    Update quantities or remove unavailable items before checking out.
+  </p>
+  {{else}}
+  <p>Ready to send these plushies on their way?</p>
+  <a class="button-link" href="/checkout">Proceed to checkout</a>{{end}}
+</article>
+{{else}}
+<article class="card empty-state">
+  <p>Your cart is empty. The bears are trying not to take it personally.</p>
+  <a href="/">Continue shopping</a>
+</article>
+{{end}} {{template "document-end" .}}{{end}}
