@@ -215,13 +215,13 @@ func New(database *sql.DB, logger *logging.Logger, options Options) (*Applicatio
 		}
 	})
 
-	dynamicHandler := permissiveCORS(dynamicMux)
+	dynamicHandler := AddNoSniff(permissiveCORS(dynamicMux))
 
 	mainMux := http.NewServeMux()
 	mainMux.HandleFunc("GET /health", func(responseWriter http.ResponseWriter, _ *http.Request) {
 		httpx.RespondWithJSON(responseWriter, http.StatusOK, map[string]any{"ok": true, "app": "bearly-secure"})
 	})
-	staticHandler := newStaticHandler(publicRoot)
+	staticHandler := AddNoSniff(newStaticHandler(publicRoot))
 	mainMux.Handle("GET /reset.css", staticHandler)
 	mainMux.Handle("GET /styles.css", staticHandler)
 	mainMux.Handle("GET /passkey.js", staticHandler)
