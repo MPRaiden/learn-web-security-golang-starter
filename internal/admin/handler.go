@@ -119,7 +119,7 @@ func (handler *Handler) CreateProduct(responseWriter http.ResponseWriter, reques
 }
 
 func (handler *Handler) EditProduct(responseWriter http.ResponseWriter, request *http.Request) {
-	current, ok := handler.requireProductEditor(responseWriter, request)
+	currentSession, ok := handler.requireAdmin(responseWriter, request)
 	if !ok {
 		return
 	}
@@ -127,11 +127,11 @@ func (handler *Handler) EditProduct(responseWriter http.ResponseWriter, request 
 	if !found {
 		return
 	}
-	handler.renderProductForm(responseWriter, request, http.StatusOK, current, "Edit "+product.Name, "Edit Product", productPath(product.ID), productInput(product), "Save changes", "")
+	handler.renderProductForm(responseWriter, request, http.StatusOK, currentSession, "Edit "+product.Name, "Edit Product", productPath(product.ID), productInput(product), "Save changes", "")
 }
 
 func (handler *Handler) UpdateProduct(responseWriter http.ResponseWriter, request *http.Request) {
-	current, ok := handler.requireProductEditor(responseWriter, request)
+	currentSession, ok := handler.requireAdmin(responseWriter, request)
 	if !ok {
 		return
 	}
@@ -141,7 +141,7 @@ func (handler *Handler) UpdateProduct(responseWriter http.ResponseWriter, reques
 	}
 	input, validationMessage := parseProductInput(request)
 	if validationMessage != "" {
-		handler.renderProductForm(responseWriter, request, http.StatusBadRequest, current, "Edit "+product.Name, "Edit Product", productPath(product.ID), input, "Save changes", validationMessage)
+		handler.renderProductForm(responseWriter, request, http.StatusBadRequest, currentSession, "Edit "+product.Name, "Edit Product", productPath(product.ID), input, "Save changes", validationMessage)
 		return
 	}
 	_, updated, err := handler.store.UpdateProduct(request.Context(), product.ID, input)
