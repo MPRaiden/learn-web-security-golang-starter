@@ -3,6 +3,7 @@ package cart
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/bootdotdev/learn-web-security/internal/accounts"
 	"github.com/bootdotdev/learn-web-security/internal/auth/sessions"
@@ -186,7 +187,10 @@ func makeItemViews(items []Item) []itemView {
 }
 
 func parseQuantity(value string, minimum int64) (int64, bool) {
-	if len(value) > 3 || (string(value[0]) == "0" && len(value) != 1) || string(value[0]) == "-" {
+	if len(value) == 0 ||
+		len(value) > 2 ||
+		strings.ContainsAny(value, " \t\n\r") ||
+		(value[0] == '0' && len(value) != 1) {
 		return 0, false
 	}
 	parsed, err := strconv.Atoi(value)
