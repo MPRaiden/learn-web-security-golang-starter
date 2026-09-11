@@ -2,7 +2,6 @@ package storefront
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 	"strings"
 
@@ -57,7 +56,7 @@ type currentUserView struct {
 
 type reviewView struct {
 	Review
-	BodyHTML template.HTML
+	BodyHTML string
 	CanEdit  bool
 }
 
@@ -244,7 +243,7 @@ func makeReviewViews(reviews []Review, current *currentUserView) []reviewView {
 	for _, review := range reviews {
 		viewReviews = append(viewReviews, reviewView{
 			Review:   review,
-			BodyHTML: template.HTML(review.Body), // Intentionally unsafe starter behavior for the XSS lesson.
+			BodyHTML: review.Body,
 			CanEdit:  current != nil && current.ID == review.UserID,
 		})
 	}
