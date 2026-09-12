@@ -9,6 +9,7 @@ import (
 	"math"
 	"net"
 	"net/http"
+	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -247,4 +248,33 @@ func AddNoSniff(next http.Handler) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		next.ServeHTTP(w, r)
 	})
+}
+
+func globalSourceValidationHandler(appOrigin string, renderer *templates.Renderer) middleware {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != "POST" {
+				next.ServeHTTP(w, r)
+				return
+			}
+			originReqHeader := r.Header.Get("Origin")
+			if originReqHeader == "" {
+				refererHeader := r.Header.Get("Referer")
+				refererUrl, err := url.Parse(refererHeader)
+				if err == nil {
+					refererScheme := refererUrl.Scheme
+					refererHost := refererUrl.Host
+					if refererScheme != "" && refererHost != "" && refererScheme+"://"+refererHost == appOrigin {
+						next.ServeHTTP(w, r)
+						return
+					}
+				}
+			} else if originReqHeader == appOrigin {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			httpx.RespondWithErrorPage(w, renderer, http.StatusForbidden, "CSRF", "Global source validation failed")
+		})
+	}
 }
