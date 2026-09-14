@@ -285,6 +285,7 @@ func AddContentSecurityPolicy(next http.Handler) http.Handler {
 		csp := fmt.Sprintf("default-src 'self'; script-src 'self' 'nonce-%s'; style-src 'self'; img-src 'self' data:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' frame-ancestors 'self'", nonce)
 		w.Header().Set("Content-Security-Policy", csp)
 		w.Header().Set("X-Frame-Options", "SAMEORIGIN")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 
 		next.ServeHTTP(w, r)
 	})
