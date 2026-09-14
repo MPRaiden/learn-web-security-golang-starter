@@ -281,7 +281,9 @@ func globalSourceValidationHandler(appOrigin string, renderer *templates.Rendere
 
 func AddContentSecurityPolicy(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'")
+		nonce := httpx.CSPNonce(r.Context())
+		csp := fmt.Sprintf("default-src 'self'; script-src 'self' 'nonce-%s'; style-src 'self'; img-src 'self' data:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'", nonce)
+		w.Header().Set("Content-Security-Policy", csp)
 
 		next.ServeHTTP(w, r)
 	})
