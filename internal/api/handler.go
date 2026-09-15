@@ -95,6 +95,13 @@ func (handler *Handler) Products(responseWriter http.ResponseWriter, request *ht
 	httpx.RespondWithJSON(responseWriter, http.StatusOK, map[string]any{"products": products})
 }
 
+func (handler *Handler) ProductOptions(responseWritter http.ResponseWriter, request *http.Request) {
+	responseWritter.Header().Set("Access-Control-Allow-Origin", "*")
+	responseWritter.Header().Set("Access-Control-Allow-Methods", "GET")
+
+	responseWritter.WriteHeader(http.StatusNoContent)
+}
+
 func (handler *Handler) WarehouseOrders(responseWriter http.ResponseWriter, request *http.Request) {
 	key, found, err := handler.apiStore.FindKey(request.Context(), request.Header.Get("X-API-Key"))
 	if err != nil {
