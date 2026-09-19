@@ -219,29 +219,27 @@ func New(database *sql.DB, logger *logging.Logger, options Options) (*Applicatio
 	})
 
 	dynamicHandler := globalSourceValidationHandler(options.AppOrigin, renderer)(
-    AddNoSniff(dynamicMux),
+    SecurityHeaders(dynamicMux),
 	)
 
 	mainMux := http.NewServeMux()
 	mainMux.HandleFunc("GET /health", func(responseWriter http.ResponseWriter, _ *http.Request) {
 		httpx.RespondWithJSON(responseWriter, http.StatusOK, map[string]any{"ok": true, "app": "bearly-secure"})
 	})
-	staticHandler := AddNoSniff(newStaticHandler(publicRoot))
+	staticHandler := SecurityHeaders(CrossOriginAllowSet(newStaticHandler(publicRoot)))
+	mainMux.Handle("GET /shipping-widget.css", staticHandler)
+	mainMux.Handle("GET /shipping-widget.js", staticHandler)
 	mainMux.Handle("GET /reset.css", staticHandler)
 	mainMux.Handle("GET /styles.css", staticHandler)
 	mainMux.Handle("GET /passkey.js", staticHandler)
 	mainMux.Handle("GET /vendor/simplewebauthn/index.umd.min.js", staticHandler)
-	mainMux.Handle("GET /shipping-widget.css", staticHandler)
 	mainMux.Handle("GET /shipping-widget.html", staticHandler)
-	mainMux.Handle("GET /shipping-widget.js", staticHandler)
 	mainMux.Handle("GET /product-photos/{filename}", staticHandler)
 	mainMux.HandleFunc("POST /integrations/pawpal/webhook", pawPalHandler.Webhook)
 	mainMux.Handle("/", dynamicHandler)
 
 	handler := applyMiddleware(
 		mainMux,
-		cspNonce,
-		AddContentSecurityPolicy,
 		recoverPanics(logger, renderer),
 	)
 	return &Application{Handler: handler, publicRoot: publicRoot}, nil
