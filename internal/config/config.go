@@ -78,8 +78,13 @@ func Parse(environment map[string]string, workingDirectory string) (Config, erro
 		databasePath = filepath.Join(workingDirectory, "data", defaultDatabaseFilename)
 	}
 
+	pawPalConfigKey, err :=requireEnvVar(environment, "PAWPAL_API_KEY")
+	if err != nil {
+		return Config{}, err
+	}
+
 	return Config{
-		PawPalAPIKey:               "bs_test_pawpal_starter_key",
+		PawPalAPIKey:               pawPalConfigKey,
 		AppOrigin:                  appOrigin,
 		Port:                       port,
 		DatabasePath:               databasePath,
@@ -219,4 +224,13 @@ func normalizeEncryptionVersion(version string) (string, error) {
 		}
 	}
 	return normalized, nil
+}
+
+func requireEnvVar(envVars map[string]string, envName string) (string, error) {
+	envValue := envVars[envName]
+	if envValue == "" {
+		return "", fmt.Errorf("missing required env var: %s", envName)
+	}
+
+	return envValue, nil
 }
