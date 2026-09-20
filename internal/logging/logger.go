@@ -6,6 +6,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 	"time"
 )
@@ -32,6 +33,13 @@ func (logger *Logger) Close() error {
 }
 
 func (logger *Logger) Event(eventName string, fields map[string]any) error {
+	sensitiveKeys := []string{"sessionId", "resetToken", "resetLink", "secret", "adminNotes", "storagePath"}
+	for k, _ := range fields {
+		if slices.Contains(sensitiveKeys, k) {
+			fields[k] = "[REDACTED]"
+		}
+	}
+	
 	record := map[string]any{
 		"timestamp": logger.now().UTC().Format("2006-01-02T15:04:05.000Z"),
 		"event":     eventName,
