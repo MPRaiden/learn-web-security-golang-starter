@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -36,6 +38,7 @@ type Config struct {
 	MaxPublicProductResults    int
 	ActiveEncryptionKeyVersion string
 	EncryptionKeys             map[string][32]byte
+	DownloadSigningKey         [32]byte
 }
 
 type AttackerLabConfig struct {
@@ -43,10 +46,16 @@ type AttackerLabConfig struct {
 }
 
 func Load(workingDirectory string) (Config, error) {
+	if err := loadEnvFile(workingDirectory); err != nil {
+		return Config{}, err
+	}
 	return Parse(processEnvironment(), workingDirectory)
 }
 
 func LoadAttackerLab(workingDirectory string) (AttackerLabConfig, error) {
+	if err := loadEnvFile(workingDirectory); err != nil {
+		return AttackerLabConfig{}, err
+	}
 	return ParseAttackerLab(processEnvironment())
 }
 
@@ -78,10 +87,24 @@ func Parse(environment map[string]string, workingDirectory string) (Config, erro
 		databasePath = filepath.Join(workingDirectory, "data", defaultDatabaseFilename)
 	}
 
-	pawPalConfigKey, err :=requireEnvVar(environment, "PAWPAL_API_KEY")
+	pawPalConfigKey, err := requireEnvVar(environment, "PAWPAL_API_KEY")
 	if err != nil {
 		return Config{}, err
 	}
+	downloadSigningKeyStr, err := requireEnvVar(environment, "DOWNLOAD_SIGNING_KEY")
+	if err != nil {
+		return Config{}, err
+	}
+	dskData, err := hex.DecodeString(downloadSigningKeyStr)
+	if err != nil {
+		return Config{}, fmt.Errorf("invalid DOWNLOAD_SIGNING_KEY: %w", err)
+	}
+	if len(dskData) != 32 {
+		return Config{}, fmt.Errorf("DOWNLOAD_SIGNING_KEY must decode to 32 bytes, got %d", len(dskData))
+	}
+
+	var dskKey [32]byte
+	copy(dskKey[:], dskData)
 
 	return Config{
 		PawPalAPIKey:               pawPalConfigKey,
@@ -94,6 +117,7 @@ func Parse(environment map[string]string, workingDirectory string) (Config, erro
 		MaxPublicProductResults:    MaxPublicProductResults,
 		ActiveEncryptionKeyVersion: activeEncryptionKeyVersion,
 		EncryptionKeys:             encryptionKeys,
+		DownloadSigningKey:         dskKey,
 	}, nil
 }
 
@@ -233,4 +257,15 @@ func requireEnvVar(envVars map[string]string, envName string) (string, error) {
 	}
 
 	return envValue, nil
+}
+
+func loadEnvFile(cwd string) error {
+	path := filepath.Join(cwd, ".env")
+	err := godotenv.Load(path)
+
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	return nil
 }
