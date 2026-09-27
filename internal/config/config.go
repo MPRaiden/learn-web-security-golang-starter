@@ -39,6 +39,7 @@ type Config struct {
 	ActiveEncryptionKeyVersion string
 	EncryptionKeys             map[string][32]byte
 	DownloadSigningKey         [32]byte
+	TrustedProxyHops           int
 }
 
 type AttackerLabConfig struct {
@@ -103,6 +104,11 @@ func Parse(environment map[string]string, workingDirectory string) (Config, erro
 		return Config{}, fmt.Errorf("DOWNLOAD_SIGNING_KEY must decode to 32 bytes, got %d", len(dskData))
 	}
 
+	trustedProxy, err := parseNonNegativeInteger(valueOrDefault(environment, "TRUST_PROXY_HOPS", "0"), "TRUST_PROXY_HOPS")
+	if err != nil {
+		return Config{}, fmt.Errorf("TRUST_PROXY_HOPS retrieve error: %w", err)
+	}
+
 	var dskKey [32]byte
 	copy(dskKey[:], dskData)
 
@@ -118,6 +124,7 @@ func Parse(environment map[string]string, workingDirectory string) (Config, erro
 		ActiveEncryptionKeyVersion: activeEncryptionKeyVersion,
 		EncryptionKeys:             encryptionKeys,
 		DownloadSigningKey:         dskKey,
+		TrustedProxyHops:           trustedProxy,
 	}, nil
 }
 

@@ -50,6 +50,7 @@ type Options struct {
 	TemplateDirectory       string
 	PublicDirectory         string
 	DownloadSigningKey      [32]byte
+	TrustedProxyHops        int
 }
 
 type Application struct {
