@@ -13,7 +13,7 @@ type EncryptedPayload struct {
 	Ciphertext []byte
 }
 
-func Encrypt(plainText []byte, key [32]byte) (EncryptedPayload, error) {
+func encrypt(plainText []byte, key [32]byte) (EncryptedPayload, error) {
 	block, err := aes.NewCipher(key[:])
 	if err != nil {
 		return EncryptedPayload{}, fmt.Errorf("new cipher creation error: %w", err)
@@ -35,7 +35,7 @@ func Encrypt(plainText []byte, key [32]byte) (EncryptedPayload, error) {
 	return EncryptedPayload{Nonce: nonce, AuthTag: sealed[tagStart:], Ciphertext: sealed[:tagStart]}, nil
 }
 
-func Decrypt(payload EncryptedPayload, key [32]byte) ([]byte, error) {
+func decrypt(payload EncryptedPayload, key [32]byte) ([]byte, error) {
 	if len(payload.Nonce) != 12 || len(payload.AuthTag) != 16 {
 		return []byte{}, fmt.Errorf("unsupported nonce or AuthTag len")
 	}
