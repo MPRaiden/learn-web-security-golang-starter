@@ -12,6 +12,13 @@ import (
 
 const MaxLength = 128
 
+const (
+	memoryKiB   = 19 * 1024
+	iterations  = 2
+	parallelism = 1
+	keylen      = 32
+)
+
 func Hash(password string) (string, error) {
 	if utf8.RuneCountInString(password) > MaxLength {
 		return "", fmt.Errorf("password too long")
@@ -20,7 +27,7 @@ func Hash(password string) (string, error) {
 	if _, err := rand.Read(salt); err != nil {
 		return "", err
 	}
-	derivedKey := argon2.IDKey([]byte(password), salt, 2, 19*1024, 1, 32)
+	derivedKey := argon2.IDKey([]byte(password), salt, iterations, memoryKiB, parallelism, keylen)
 	passHash := argon2idHash{
 		version:     argon2.Version,
 		memoryKiB:   19 * 1024,
@@ -64,6 +71,19 @@ func Verify(password, encodedHash string) bool {
 	return true
 }
 
-func NeedsRehash(string) bool {
+func NeedsRehash(encodedHash string) bool {
+	_, ok := decodeLegacyHash(encodedHash)
+	if ok {
+		return true
+	}
+
+	argExpHash, ok := parseArgon2idHash(encodedHash)
+	if !ok {
+		return false
+	}
+	if argExpHash.version != argon2.Version || argExpHash.memoryKiB != memoryKiB || argExpHash.iterations != iterations || argExpHash.parallelism != parallelism || uint32(len(argExpHash.derivedKey)) != keylen {
+		return true
+	}
+
 	return false
 }
