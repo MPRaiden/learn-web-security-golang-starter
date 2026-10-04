@@ -110,6 +110,9 @@ func (keyring *Keyring) Decrypt(serialized string) ([]byte, error) {
 		Ciphertext: verEncPayload.Ciphertext,
 	}
 	decrPayload, err := decrypt(encPayload, key)
+	if err != nil {
+		return []byte{}, err
+	}
 
 	return decrPayload, nil
 }
