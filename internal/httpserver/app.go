@@ -145,10 +145,11 @@ func New(database *sql.DB, logger *logging.Logger, options Options) (*Applicatio
 	dynamicMux.HandleFunc("GET /products/{id}", storefrontHandler.Product)
 	dynamicMux.HandleFunc("GET /api/account/orders", apiHandler.AccountOrders)
 	dynamicMux.HandleFunc("GET /api/orders/{id}", apiHandler.Order)
-	dynamicMux.HandleFunc("GET /api/products", func(w http.ResponseWriter, r *http.Request) {
+	fixWinLimiter := fixedWindowRateLimiter(rateLimitOptions{window: 1 * time.Minute, maximum: 30, key: clientIPKeyWithTrustedProxies(options.TrustedProxyHops)})
+	dynamicMux.Handle("GET /api/products", fixWinLimiter(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		apiHandler.Products(w, r)
-	})
+	})))
 	dynamicMux.HandleFunc("OPTIONS /api/products", apiHandler.ProductOptions)
 	dynamicMux.HandleFunc("GET /api/integrations/warehouse/orders", apiHandler.WarehouseOrders)
 	dynamicMux.Handle("POST /products/{id}/reviews", parseForm(options.MaxRequestBodyBytes, renderer)(http.HandlerFunc(reviewHandler.Create)))
