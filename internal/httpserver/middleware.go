@@ -50,9 +50,24 @@ func recoverPanics(logger *logging.Logger, renderer *templates.Renderer) middlew
 	}
 }
 
-func LoadShedder(_ int, _ int) func(http.Handler) http.Handler {
+func LoadShedder(concurrencyCap int, retryDelay int) func(http.Handler) http.Handler {
+	if concurrencyCap <= 0 || retryDelay <= 0 {
+		panic("concurrency cap and retry delay must be positive")
+	}
+	inFlightReqCh := make(chan int, concurrencyCap)
+
 	return func(next http.Handler) http.Handler {
-		return next
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("X-In-Flight-Limit", strconv.Itoa(concurrencyCap))
+			select {
+			case inFlightReqCh <- 1:
+				defer func() { <-inFlightReqCh }()
+				next.ServeHTTP(w, r)
+			default:
+				w.Header().Set("Retry-After", strconv.Itoa(retryDelay))
+				httpx.RespondWithJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "Service is at capacity"})
+			}
+		})
 	}
 }
 

@@ -228,7 +228,7 @@ func New(database *sql.DB, logger *logging.Logger, options Options) (*Applicatio
 	})
 
 	dynamicHandler := globalSourceValidationHandler(options.AppOrigin, renderer)(
-		SecurityHeaders(fixedWindowRateLimiter(rateLimitOptions{window: 1 * time.Minute, maximum: 100, key: clientIPKeyWithTrustedProxies(options.TrustedProxyHops)})(dynamicMux)),
+		SecurityHeaders(LoadShedder(50, 1)(fixedWindowRateLimiter(rateLimitOptions{window: 1 * time.Minute, maximum: 100, key: clientIPKeyWithTrustedProxies(options.TrustedProxyHops)})(dynamicMux))),
 	)
 
 	mainMux := http.NewServeMux()
