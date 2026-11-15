@@ -12,6 +12,7 @@ import (
 	"github.com/bootdotdev/learn-web-security/internal/auth/passwords"
 	"github.com/bootdotdev/learn-web-security/internal/auth/returnto"
 	"github.com/bootdotdev/learn-web-security/internal/auth/sessions"
+	"github.com/bootdotdev/learn-web-security/internal/botdetection"
 	"github.com/bootdotdev/learn-web-security/internal/httpx"
 	"github.com/bootdotdev/learn-web-security/internal/logging"
 	"github.com/bootdotdev/learn-web-security/internal/templates"
@@ -196,6 +197,10 @@ func (handler *authHandler) Signup(responseWriter http.ResponseWriter, request *
 	passwordHash, err := passwords.Hash(password)
 	if err != nil {
 		handler.internalError(responseWriter, request, err)
+		return
+	}
+	botDetected := botdetection.ProtectSignup(responseWriter, request, handler.renderer)
+	if botDetected {
 		return
 	}
 	user, err := handler.accounts.CreateCustomer(request.Context(), email, displayName, passwordHash)
